@@ -19,7 +19,7 @@ public class SplitInstance {
     private SplitInstance()
     {
     	try {
-			splitFactory = SplitFactoryBuilder.build("rccrmcqvhlcjahv9vrc033ooaau88vd3groc", config);
+			splitFactory = SplitFactoryBuilder.build("cf7kbi6b5slr3qr7lvr4mlh9kg1mkoql4f7f", config); // API key : Server-side
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();

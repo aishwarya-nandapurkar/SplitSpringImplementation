@@ -25,4 +25,21 @@ public class ContentController {
 	public Content checkVehicleMakeMatch(@RequestParam String make) {
 		return contentService.checkVehicleMakeMatch(make);
 	}	
+	
+	@GetMapping("/checkWhatsNew")
+	public Content checkWhatsNew(@RequestParam String orgId) {
+		return contentService.showWhatsNew(orgId);
+	}	
+	
+	@GetMapping("/manage1on1s")
+	public Content manage1on1s(@RequestParam String orgId, String userId  ) {
+		return contentService.reArrange1on1sBasedOnUser(orgId,userId);
+	}	
+	
+	@GetMapping("/checkPromotionalBanner")
+	public Content checkPromotionalBanner(@RequestParam String userId) {
+		return contentService.showPromotionalBanner(userId);
+	}
+	
+	
 }

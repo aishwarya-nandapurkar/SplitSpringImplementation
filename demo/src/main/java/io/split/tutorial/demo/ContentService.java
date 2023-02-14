@@ -1,20 +1,19 @@
 package io.split.tutorial.demo;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
-import org.assertj.core.internal.bytebuddy.utility.RandomString;
 import org.springframework.stereotype.Service;
 
 import io.split.client.SplitClient;
-import io.split.client.SplitClientConfig;
-import io.split.client.SplitFactory;
-import io.split.client.SplitFactoryBuilder;
-
+import io.split.client.api.SplitResult;
+import split.com.google.gson.Gson;
+	
 @Service
 public class ContentService {
+	String configValues="";
 
 	public Content healthCheck() {
 
@@ -26,7 +25,7 @@ public class ContentService {
 			System.out.print("Split had an issue. NOT loaded correctly!");
 		}
 
-		String treatment = client.getTreatment("CUSTOMER_ID", "first_split");
+		String treatment = client.getTreatment("ash123", "js_test");
 
 		if (treatment.equals("on")) {
 			boolean track_event1 = client.track("CUSTOMER_ID", "user", "app_loaded");
@@ -45,6 +44,55 @@ public class ContentService {
 		}
 	}
 
+	public Content showWhatsNew(String orgId) {
+
+		SplitClient client = SplitInstance.getInstance().splitFactory.client();
+		HashMap<String, String> config = null;
+		try {
+			client.blockUntilReady();
+		} catch (TimeoutException | InterruptedException e) {
+			// log & handle
+			System.out.print("Split had an issue. NOT loaded correctly!");
+		}
+
+		//String treatment = client.getTreatment(orgId, "enable_whatsnew");
+		SplitResult result=client.getTreatmentWithConfig(orgId, "enable_whatsnew");
+		String treatment = result.treatment();
+	    if (result.config() != null) {
+	        Gson gson = new Gson();
+	       config= gson.fromJson(result.config(), HashMap.class);
+	    }
+
+		if (treatment.equals("ExperienceA")) {
+			boolean track_event1 = client.track(orgId, "org", "app_loaded");
+			System.out.println("Split event tracked for whatsnew " + track_event1);
+			if(config!=null)
+			{
+				System.out.print(config.toString());
+				System.out.print("************ Text from config : "+config.get("text"));
+				return new Content(config.get("text"));
+			}else
+				return new Content("Not found");
+			
+		} else if (treatment.equals("ExperienceB")) {
+			// insert code here to show off treatment
+			boolean track_event1 = client.track(orgId, "org", "app_down");
+			System.out.println("Treatment is Experience B");
+			if(config!=null)
+			{
+				System.out.print(config.toString());
+				System.out.print("************ Text from config : "+config.get("text"));
+				return new Content(config.get("text"));
+			}else
+				return new Content("Not found");
+
+		} else {
+			// insert your control treatment code here
+			return new Content("NA");
+
+		}
+	}
+	
 	public Content fetchVehicleData() {
 
 		try {
@@ -118,4 +166,94 @@ public class ContentService {
 
 		return new Content("Work in progress!!");
 	}
+	
+	public Content reArrange1on1sBasedOnUser(String orgId, String userId) {
+
+		SplitClient client = SplitInstance.getInstance().splitFactory.client();
+		
+		try {
+			client.blockUntilReady();
+		} catch (TimeoutException | InterruptedException e) {
+			// log & handle
+			System.out.print("Split had an issue. NOT loaded correctly!");
+		}
+
+		//String treatment = client.getTreatment(orgId, "Manage1on1s");
+		//SplitResult result=client.getTreatmentWithConfig(orgId, "Manage1on1s");
+		
+	    
+	    Map<String, Object> attributes = new HashMap<String, Object>();
+	    attributes.put("user_id", userId);
+	    
+	    String treatment=client.getTreatment(orgId, "Manage1on1s", attributes);
+	    
+		if (treatment.equals("on")) {
+			boolean track_event1 = client.track(orgId, "org", "enabing1on1");
+			System.out.println("Split event tracked for manage1on1s " + track_event1);
+			
+				return new Content("Manage1on1s enabled for this user");
+			
+		} else if (treatment.equals("off")) {
+			// insert code here to show off treatment
+			boolean track_event1 = client.track(orgId, "org", "notenabing1on1");
+			System.out.println("Treatment is Experience B");
+			
+				return new Content("Manage1on1s NOT enabled for this user");
+
+		} else {
+			// insert your control treatment code here
+			return new Content("NA");
+
+		}
+	}
+	
+	
+	public Content showPromotionalBanner(String userid) {
+
+		SplitClient client = SplitInstance.getInstance().splitFactory.client();
+		HashMap<String, String> config = null;
+		try {
+			client.blockUntilReady();
+		} catch (TimeoutException | InterruptedException e) {
+			// log & handle
+			System.out.print("Split had an issue. NOT loaded correctly!");
+		}
+
+		SplitResult result=client.getTreatmentWithConfig(userid, "showPromotionBanner");
+		String treatment = result.treatment();
+	    if (result.config() != null) {
+	        Gson gson = new Gson();
+	       config= gson.fromJson(result.config(), HashMap.class);
+	    }
+
+		if (treatment.equals("on")) {
+			boolean track_event1 = client.track(userid, "user", "banneron");
+			System.out.println("Split event tracked for promotionalbanner " + track_event1);
+			if(config!=null)
+			{
+				System.out.print(config.toString());
+				System.out.print("************ Text from config : "+config.get("bannerText"));
+				return new Content(config.get("bannerText"));
+			}else
+				return new Content("Not found");
+			
+		} else if (treatment.equals("off")) {
+			// insert code here to show off treatment
+			boolean track_event1 = client.track(userid, "user", "bannerOff");
+			System.out.println("bannerOff tracked :"+track_event1);
+			if(config!=null)
+			{
+				System.out.print(config.toString());
+				System.out.print("************ Text from config : "+config.get("bannerText"));
+				return new Content(config.get("bannerText"));
+			}else
+				return new Content("Not found");
+
+		} else {
+			// insert your control treatment code here
+			return new Content("NA");
+
+		}
+	}
+	
 }
