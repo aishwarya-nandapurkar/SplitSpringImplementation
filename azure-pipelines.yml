@@ -1,4 +1,28 @@
 # Maven
+- task: SplitUpdateDefinition@4
+  inputs:
+    ServiceConnection: 'SplitADOExperi'
+    WorkspaceId: 'd28a9ae0-fe3a-11ec-a40c-36bbbb172e18'
+    EnvironmentId: 'd2980860-fe3a-11ec-a40c-36bbbb172e18'
+    SplitTargetingDefinition: |
+      {
+        "treatments": [
+          {
+            "name": "on"
+          },
+          {
+            "name": "off"
+          }
+        ],
+        "defaultTreatment": "off",
+        "rules": [],
+        "defaultRule": [
+          {
+            "treatment": "off",
+            "size": 100
+          }
+        ]
+      }
 # Build your Java project and run tests with Apache Maven.
 # Add steps that analyze code, save build artifacts, deploy, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/languages/java
