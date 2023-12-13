@@ -1,6 +1,7 @@
 package io.split.tutorial.demo;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
@@ -14,10 +15,30 @@ import split.com.google.gson.Gson;
 @Service
 public class ContentService {
 	String configValues="";
-
+	SplitClient client = SplitInstance.getInstance().splitFactory.client();
+	//client.blockUntilReady();
+	
+	List<String> splitNames = SplitInstance.getInstance().splitFactory.manager().splitNames();
+	
+	
+	public void readSplits()
+	{
+		if (splitNames!=null ) {
+			 for (int i = 0; i < splitNames.size(); i++) {
+			    	
+			        System.out.print("SplitName : "+splitNames.get(i));
+		        	
+		        	
+	              
+	         }
+		}
+	   
+	}
+	
+	
 	public Content healthCheck() {
 
-		SplitClient client = SplitInstance.getInstance().splitFactory.client();
+		
 		try {
 			client.blockUntilReady();
 		} catch (TimeoutException | InterruptedException e) {
@@ -46,7 +67,7 @@ public class ContentService {
 
 	public Content showWhatsNew(String orgId) {
 
-		SplitClient client = SplitInstance.getInstance().splitFactory.client();
+	//	SplitClient client = SplitInstance.getInstance().splitFactory.client();
 		HashMap<String, String> config = null;
 		try {
 			client.blockUntilReady();
@@ -96,7 +117,7 @@ public class ContentService {
 	public Content fetchVehicleData() {
 
 		try {
-			SplitClient client = SplitInstance.getInstance().splitFactory.client();
+	//		SplitClient client = SplitInstance.getInstance().splitFactory.client();
 			client.blockUntilReady();
 			String uuid_user = UUID.randomUUID().toString();
 			String treatment = client.getTreatment(uuid_user, // unique identifier for your user
@@ -131,7 +152,7 @@ public class ContentService {
 
 	public Content checkVehicleMakeMatch(String make) {
 		try {
-			SplitClient client = SplitInstance.getInstance().splitFactory.client();
+		//	SplitClient client = SplitInstance.getInstance().splitFactory.client();
 			client.blockUntilReady();
 			String uuid_make = "MAKE" + Math.random();
 			String treatment = client.getTreatment(uuid_make, // unique identifier for your user
@@ -169,7 +190,7 @@ public class ContentService {
 	
 	public Content reArrange1on1sBasedOnUser(String orgId, String userId) {
 
-		SplitClient client = SplitInstance.getInstance().splitFactory.client();
+	//	SplitClient client = SplitInstance.getInstance().splitFactory.client();
 		
 		try {
 			client.blockUntilReady();
@@ -184,6 +205,7 @@ public class ContentService {
 	    
 	    Map<String, Object> attributes = new HashMap<String, Object>();
 	    attributes.put("user_id", userId);
+	    attributes.put("location", "California");
 	    
 	    String treatment=client.getTreatment(orgId, "Manage1on1s", attributes);
 	    
@@ -208,9 +230,10 @@ public class ContentService {
 	}
 	
 	
-	public Content showPromotionalBanner(String userid) {
-
-		SplitClient client = SplitInstance.getInstance().splitFactory.client();
+	public PromotionalBannerContent showPromotionalBanner(String userid) {
+		readSplits();
+	//	SplitClient client = SplitInstance.getInstance().splitFactory.client();
+		//client = SplitInstance.getInstance().splitFactory.client();
 		HashMap<String, String> config = null;
 		try {
 			client.blockUntilReady();
@@ -221,6 +244,8 @@ public class ContentService {
 
 		SplitResult result=client.getTreatmentWithConfig(userid, "showPromotionBanner");
 		String treatment = result.treatment();
+		System.out.print("++++++++++++ Printing getTreatment call's result : "+treatment);
+		
 	    if (result.config() != null) {
 	        Gson gson = new Gson();
 	       config= gson.fromJson(result.config(), HashMap.class);
@@ -233,9 +258,9 @@ public class ContentService {
 			{
 				System.out.print(config.toString());
 				System.out.print("************ Text from config : "+config.get("bannerText"));
-				return new Content(config.get("bannerText"));
+				return new PromotionalBannerContent(config.get("bannerText"), config.get("url") );
 			}else
-				return new Content("Not found");
+				return new PromotionalBannerContent("NA","NA");
 			
 		} else if (treatment.equals("off")) {
 			// insert code here to show off treatment
@@ -245,13 +270,24 @@ public class ContentService {
 			{
 				System.out.print(config.toString());
 				System.out.print("************ Text from config : "+config.get("bannerText"));
-				return new Content(config.get("bannerText"));
+				return new PromotionalBannerContent(config.get("bannerText"), config.get("url") );
 			}else
-				return new Content("Not found");
+				return new PromotionalBannerContent("NA","NA");
 
-		} else {
+		} else if (treatment.equals("maintenance")) {
+			boolean track_event1 = client.track(userid, "user", "maintenance");
+			System.out.println("maintenance tracked :"+track_event1);
+			if(config!=null)
+			{
+				System.out.print(config.toString());
+				System.out.print("************ Text from config : "+config.get("bannerText"));
+				return new PromotionalBannerContent(config.get("bannerText"), config.get("url") );
+			}else
+				return new PromotionalBannerContent("NA","NA");
+
+		}else {
 			// insert your control treatment code here
-			return new Content("NA");
+			return new PromotionalBannerContent("NA","NA");
 
 		}
 	}
